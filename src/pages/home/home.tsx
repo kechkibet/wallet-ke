@@ -84,7 +84,6 @@ const HomePage: React.FC = () => {
   );
 
   return (
-    <PageContainer>
       <div className="max-w-3xl mx-auto">
         <Card className="mb-6 border border-orange-200" bodyStyle={{ padding: 24 }}>
           <div className="flex items-center justify-between mb-4">
@@ -185,7 +184,6 @@ const HomePage: React.FC = () => {
           </Tabs>
         </Card>
       </div>
-    </PageContainer>
   );
 };
 
