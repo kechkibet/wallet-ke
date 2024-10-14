@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { PageContainer } from '@ant-design/pro-layout';
-import { Card, Tabs, Button, List, Avatar, Tag, Typography, Space } from 'antd';
+import { Card, Tabs, Button, List, Avatar, Tag, Typography, Space, Row, Col, Dropdown, Menu } from 'antd';
 import {
   EditOutlined,
   DeleteOutlined,
@@ -9,6 +9,7 @@ import {
   ArrowUpOutlined,
   SendOutlined,
   FileTextOutlined,
+  MoreOutlined,
 } from '@ant-design/icons';
 
 const { TabPane } = Tabs;
@@ -83,29 +84,48 @@ const HomePage: React.FC = () => {
     <Tag color="orange">{label}</Tag>
   );
 
+  const drawerActionMenu = (drawer: Drawer) => (
+    <Menu>
+      <Menu.Item key="1" icon={<FileTextOutlined />} onClick={() => handleViewStatement(drawer.id)}>
+        View Statement
+      </Menu.Item>
+      <Menu.Item key="2" icon={<EditOutlined />} onClick={() => handleEditDrawer(drawer.id)}>
+        Edit
+      </Menu.Item>
+      <Menu.Item key="3" icon={<DeleteOutlined />} onClick={() => handleRemoveDrawer(drawer.id)} danger>
+        Remove
+      </Menu.Item>
+    </Menu>
+  );
+
   return (
-      <div className="max-w-3xl mx-auto">
-        <Card className="mb-6 border border-orange-200" bodyStyle={{ padding: 24 }}>
-          <div className="flex items-center justify-between mb-4">
-            <Space size="large">
-              <Avatar size={64} src="/placeholder.svg?height=64&width=64" className="border-2 border-orange-300" />
+    <div className="max-w-3xl mx-auto">
+      <Card className="mb-4 border border-orange-200" style={{ padding: 16}}>
+        <Row gutter={[16, 16]} align="middle">
+          <Col xs={24} sm={12}>
+            <Space size="middle">
+              <Avatar size={48} src="/placeholder.svg?height=48&width=48" className="border-2 border-orange-300" />
               <div>
-                <Title level={2} className="text-orange-800 m-0">My Wallet</Title>
+                <Title level={4} className="text-orange-800 m-0">My Wallet</Title>
                 <Text className="text-orange-600">{walletPhone}</Text>
               </div>
             </Space>
+          </Col>
+        </Row>
+        <Row gutter={[16, 16]} align="middle" className="mt-4">
+          <Col xs={24} sm={12}>
+            <Title level={3} className="text-orange-600 m-0">
+              KES {walletBalance.toFixed(2)}
+            </Title>
+          </Col>
+          <Col xs={24} sm={12} className="text-right">
+            <Space>
             <Button
               icon={<FileTextOutlined />}
               onClick={handleViewWalletStatement}
               type="text"
               className="text-orange-600 hover:bg-orange-100"
             />
-          </div>
-          <div className="flex items-center justify-between">
-            <Title level={3} className="text-orange-600 m-0">
-              KES {walletBalance.toFixed(2)}
-            </Title>
-            <Space>
               <Button type="primary" icon={<ArrowUpOutlined />} onClick={handleTopUp} className="bg-orange-500 hover:bg-orange-600">
                 Top Up
               </Button>
@@ -113,77 +133,87 @@ const HomePage: React.FC = () => {
                 Send
               </Button>
             </Space>
-          </div>
-        </Card>
-        
-        <Card className="border border-orange-200">
-          <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key as 'drawers' | 'accounts')}>
-            <TabPane tab="Drawers" key="drawers">
-              <List
-                dataSource={drawers}
-                renderItem={drawer => (
-                  <List.Item
-                    key={drawer.id}
-                    actions={[
-                      <Button icon={<FileTextOutlined />} type="text" onClick={() => handleViewStatement(drawer.id)} />,
-                      <Button icon={<EditOutlined />} type="text" onClick={() => handleEditDrawer(drawer.id)} />,
-                      <Button icon={<DeleteOutlined />} type="text" danger onClick={() => handleRemoveDrawer(drawer.id)} />,
-                    ]}
-                    className="bg-orange-50 rounded-lg border border-orange-200 mb-4"
-                  >
-                    <List.Item.Meta
-                      avatar={<Avatar src={drawer.avatar} className="border border-orange-300" />}
-                      title={<Text strong className="text-orange-800">{drawer.phoneNumber}</Text>}
-                      description={
-                        <>
-                          <Text className="text-orange-600">Max: ${drawer.maxAmount}</Text>
-                          <br />
-                          {drawer.requiresConfirmation && <RequirementTag label="Confirmation" />}
-                          {drawer.requiresReason && <RequirementTag label="Reason" />}
-                        </>
-                      }
-                    />
-                  </List.Item>
-                )}
-              />
-              <Button icon={<PlusOutlined />} onClick={handleAddDrawer} type="dashed" block>
-                Add drawer
-              </Button>
-            </TabPane>
-            <TabPane tab="Accounts" key="accounts">
-              <List
-                dataSource={accounts}
-                renderItem={account => (
-                  <List.Item
-                    key={account.id}
-                    extra={
-                      <Button type='primary' icon={<CreditCardOutlined />} onClick={() => handleWithdraw(account.id)} className="bg-orange-400 text-white hover:bg-orange-500">
+          </Col>
+        </Row>
+      </Card>
+      
+      <Card className="border border-orange-200" style={{ padding: 16 ,marginTop: 10}}>
+        <Tabs activeKey={activeTab} onChange={(key) => setActiveTab(key as 'drawers' | 'accounts')}>
+          <TabPane tab="Drawers" key="drawers">
+            <List
+              dataSource={drawers}
+              renderItem={drawer => (
+                <List.Item
+                  key={drawer.id}
+                  actions={[
+                    <Dropdown overlay={drawerActionMenu(drawer)} trigger={['click']}>
+                      <Button icon={<MoreOutlined />} type="text" />
+                    </Dropdown>,
+                  ]}
+                  className="bg-orange-50 rounded-lg border border-orange-200 mb-2 p-2"
+                >
+                  <List.Item.Meta
+                    avatar={<Avatar src={drawer.avatar} className="border border-orange-300" />}
+                    title={<Text strong className="text-orange-800">{drawer.phoneNumber}</Text>}
+                    description={
+                      <>
+                        <Text className="text-orange-600">Max: KES {drawer.maxAmount}</Text>
+                        <br />
+                        {drawer.requiresConfirmation && <RequirementTag label="Confirmation" />}
+                        {drawer.requiresReason && <RequirementTag label="Reason" />}
+                      </>
+                    }
+                  />
+                </List.Item>
+              )}
+            />
+            <Button icon={<PlusOutlined />} onClick={handleAddDrawer} type="dashed" block className="mt-2">
+              Add drawer
+            </Button>
+          </TabPane>
+          <TabPane tab="Accounts" key="accounts">
+            <List
+              dataSource={accounts}
+              renderItem={account => (
+                <List.Item
+                  key={account.id}
+                  className="bg-orange-50 rounded-lg border border-orange-200 mb-2 p-2"
+                >
+                  <Row gutter={[16, 16]} align="middle" style={{ width: '100%' }}>
+                    <Col xs={24} sm={16}>
+                      <List.Item.Meta
+                        avatar={<Avatar src={account.avatar} className="border border-orange-300" />}
+                        title={<Text strong className="text-orange-800">{account.name}</Text>}
+                        description={
+                          <>
+                            <Text className="text-orange-600">Balance: KES {account.balance.toFixed(2)}</Text>
+                            <br />
+                            <Text className="text-orange-600">Max: KES {account.maxAmount}</Text>
+                            <br />
+                            {account.requiresConfirmation && <RequirementTag label="Confirmation" />}
+                            {account.requiresReason && <RequirementTag label="Reason" />}
+                          </>
+                        }
+                      />
+                    </Col>
+                    <Col xs={24} sm={8} className="text-right">
+                      <Button 
+                        type="primary" 
+                        icon={<CreditCardOutlined />} 
+                        onClick={() => handleWithdraw(account.id)} 
+                        className="bg-orange-400 text-white hover:bg-orange-500 w-full sm:w-auto"
+                      >
                         Withdraw
                       </Button>
-                    }
-                    className="bg-orange-50 rounded-lg border border-orange-200 mb-4"
-                  >
-                    <List.Item.Meta
-                      avatar={<Avatar src={account.avatar} className="border border-orange-300" />}
-                      title={<Text strong className="text-orange-800">{account.name}</Text>}
-                      description={
-                        <>
-                          <Text className="text-orange-600">Balance: ${account.balance.toFixed(2)}</Text>
-                          <br />
-                          <Text className="text-orange-600">Max: ${account.maxAmount}</Text>
-                          <br />
-                          {account.requiresConfirmation && <RequirementTag label="Confirmation" />}
-                          {account.requiresReason && <RequirementTag label="Reason" />}
-                        </>
-                      }
-                    />
-                  </List.Item>
-                )}
-              />
-            </TabPane>
-          </Tabs>
-        </Card>
-      </div>
+                    </Col>
+                  </Row>
+                </List.Item>
+              )}
+            />
+          </TabPane>
+        </Tabs>
+      </Card>
+    </div>
   );
 };
 
