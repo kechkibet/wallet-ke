@@ -36,7 +36,7 @@ interface Account {
 
 const HomePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'drawers' | 'accounts'>('drawers');
-  const [walletBalance, setWalletBalance] = useState(1000);
+  const [walletBalance, setWalletBalance] = useState(10000);
   const [walletPhone, setWalletPhone] = useState('+1 (555) 000-0000');
   const [drawers, setDrawers] = useState<Drawer[]>([
     { id: 1, phoneNumber: '+1 (555) 123-4567', maxAmount: 500, requiresConfirmation: true, requiresReason: false, avatar: '/placeholder.svg?height=40&width=40' },
@@ -114,9 +114,10 @@ const HomePage: React.FC = () => {
         </Row>
         <Row gutter={[16, 16]} align="middle" className="mt-4">
           <Col xs={24} sm={12}>
-            <Title level={3} className="text-orange-600 m-0">
-              KES {walletBalance.toFixed(2)}
-            </Title>
+          <Title level={3} className="text-orange-600 m-0">
+            KES {walletBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          </Title>
+
           </Col>
           <Col xs={24} sm={12} className="text-right">
             <Space>

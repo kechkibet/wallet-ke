@@ -21,6 +21,7 @@ import { createStyles } from 'antd-style';
 import React, { useState } from 'react';
 import { flushSync } from 'react-dom';
 import Settings from '../../../../config/defaultSettings';
+import PageTheme from '@/components/PageTheme';
 
 const useStyles = createStyles(({ token }) => {
   return {
@@ -144,6 +145,7 @@ const Login: React.FC = () => {
   const { status, type: loginType } = userLoginState;
 
   return (
+    <PageTheme>
     <div className={styles.container}>
       <Helmet>
         <title>
@@ -356,6 +358,7 @@ const Login: React.FC = () => {
         </LoginForm>
       </div>
     </div>
+    </PageTheme>
   );
 };
 
