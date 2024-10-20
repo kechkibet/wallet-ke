@@ -105,7 +105,7 @@ const Login: React.FC = () => {
             ]}
             onGetCaptcha={async (phone) => handleSendOtp(phone)}
             captchaTextRender={(timing, count) =>
-              timing ? `${count} seconds remaining` : 'Send OTP'
+              timing ? `${count}` : 'Send OTP'
             }
           />
         </LoginForm>
