@@ -47,15 +47,9 @@ export async function verifyOtp(correlationId: string, code: string): Promise<an
       },
       data: { correlationId, code },
     });
-
-    if (response.code === 200) {
-      return response;
-    } else {
-      message.error(response?.error || 'Failed to verify OTP');
-      return response;
-    }
+    return response;
   } catch (error) {
-    message.error('Network error occurred while verifying OTP');
+    message.error(error.message ||'Network error occurred while verifying OTP');
     throw error;
   }
 }

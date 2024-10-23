@@ -24,7 +24,9 @@ const Login: React.FC = () => {
 
       const result = await verifyOtp(correlationId, values.otp);
 
-      if (result.code === 200) {
+      if (result.token) {
+        // Save the token to local storage
+        localStorage.setItem('token', result.token);
         message.success(intl.formatMessage({ id: 'pages.login.success', defaultMessage: 'Login successful!' }));
         // Redirect after successful login
         window.location.href = '/';
