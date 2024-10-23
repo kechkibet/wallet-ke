@@ -24,7 +24,16 @@ export async function getInitialState(): Promise<{
       const msg = await queryCurrentUser({
         skipErrorHandler: true,
       });
-      return msg.data;
+    
+      /// enriched the data
+      const enrichedUserInfo = {
+        ...msg,
+        name: msg.phone,
+        avatar: 'https://cdn-icons-png.freepik.com/256/428/428573.png'
+      };
+
+      return enrichedUserInfo;
+
     } catch (error) {
       history.push(loginPath);
     }
@@ -49,7 +58,7 @@ export async function getInitialState(): Promise<{
 // ProLayout 支持的api https://procomponents.ant.design/components/layout
 export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) => {
   return {
-    actionsRender: () => [<Question key="doc" />, <SelectLang key="SelectLang" />],
+    //actionsRender: () => [<Question key="doc" />, <SelectLang key="SelectLang" />],
     avatarProps: {
       src: initialState?.currentUser?.avatar,
       title: <AvatarName />,

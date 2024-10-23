@@ -99,7 +99,7 @@ const Login: React.FC = () => {
             })}
             rules={[
               { required: true, message: 'Please enter your phone number!' },
-              { pattern: /^254\d{9}$/, message: 'Invalid phone number format!' },
+              { pattern: /^\d{10}$/, message: 'Must be 10 digits!' },
             ]}
           />
           <ProFormCaptcha
