@@ -1,5 +1,4 @@
-import React, { useState } from 'react';
-import { PageContainer } from '@ant-design/pro-layout';
+import React, { useEffect, useState } from 'react';
 import { Card, Tabs, Button, List, Avatar, Tag, Typography, Space, Row, Col, Dropdown, Menu } from 'antd';
 import {
   EditOutlined,
@@ -11,7 +10,7 @@ import {
   FileTextOutlined,
   MoreOutlined,
 } from '@ant-design/icons';
-
+import { currentUser as queryCurrentUser } from '../../services/ant-design-pro/api';
 const { TabPane } = Tabs;
 const { Title, Text } = Typography;
 
@@ -35,9 +34,8 @@ interface Account {
 }
 
 const HomePage: React.FC = () => {
+  const [user, setUser] = useState({});
   const [activeTab, setActiveTab] = useState<'drawers' | 'accounts'>('drawers');
-  const [walletBalance, setWalletBalance] = useState(10000);
-  const [walletPhone, setWalletPhone] = useState('+1 (555) 000-0000');
   const [drawers, setDrawers] = useState<Drawer[]>([
     { id: 1, phoneNumber: '+1 (555) 123-4567', maxAmount: 500, requiresConfirmation: true, requiresReason: false, avatar: '/placeholder.svg?height=40&width=40' },
     { id: 2, phoneNumber: '+1 (555) 987-6543', maxAmount: 750, requiresConfirmation: false, requiresReason: true, avatar: '/placeholder.svg?height=40&width=40' },
@@ -47,6 +45,14 @@ const HomePage: React.FC = () => {
     { id: 1, name: 'Checking Account', balance: 5000, maxAmount: 1000, requiresConfirmation: true, requiresReason: false, avatar: '/placeholder.svg?height=40&width=40' },
     { id: 2, name: 'Savings Account', balance: 10000, maxAmount: 2000, requiresConfirmation: true, requiresReason: true, avatar: '/placeholder.svg?height=40&width=40' },
   ]);
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      const userInfo = await queryCurrentUser();
+      setUser(userInfo);
+    };
+    fetchUser();
+  }, []);
 
   const handleEditDrawer = (id: number) => {
     console.log(`Edit drawer with id: ${id}`);
@@ -107,7 +113,7 @@ const HomePage: React.FC = () => {
               <Avatar size={48} src="/placeholder.svg?height=48&width=48" className="border-2 border-orange-300" />
               <div>
                 <Title level={4} className="text-orange-800 m-0">My Wallet</Title>
-                <Text className="text-orange-600">{walletPhone}</Text>
+                <Text className="text-orange-600">{user.phone}</Text>
               </div>
             </Space>
           </Col>
@@ -115,7 +121,7 @@ const HomePage: React.FC = () => {
         <Row gutter={[16, 16]} align="middle" className="mt-4">
           <Col xs={24} sm={12}>
           <Title level={3} className="text-orange-600 m-0">
-            KES {walletBalance.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            KES {(user.balance ?? 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </Title>
 
           </Col>
