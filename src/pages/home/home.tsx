@@ -10,17 +10,20 @@ import {
   FileTextOutlined,
   MoreOutlined,
 } from '@ant-design/icons';
+import { getDrawees, addDrawee, removeDrawee } from './service'; // Import APIs
 import { currentUser as queryCurrentUser } from '../../services/ant-design-pro/api';
 const { TabPane } = Tabs;
 const { Title, Text } = Typography;
 
 interface Drawer {
-  id: number;
-  phoneNumber: string;
-  maxAmount: number;
-  requiresConfirmation: boolean;
-  requiresReason: boolean;
-  avatar: string;
+  ID: number;
+  Phone: string;
+  Limit: number,
+  RequiresConfirmation: boolean,
+  RequiresReason: boolean,
+  CycleLimit: 500,
+  CycleType: string,
+  CycleUsed: number
 }
 
 interface Account {
@@ -36,11 +39,8 @@ interface Account {
 const HomePage: React.FC = () => {
   const [user, setUser] = useState({});
   const [activeTab, setActiveTab] = useState<'drawers' | 'accounts'>('drawers');
-  const [drawers, setDrawers] = useState<Drawer[]>([
-    { id: 1, phoneNumber: '+1 (555) 123-4567', maxAmount: 500, requiresConfirmation: true, requiresReason: false, avatar: '/placeholder.svg?height=40&width=40' },
-    { id: 2, phoneNumber: '+1 (555) 987-6543', maxAmount: 750, requiresConfirmation: false, requiresReason: true, avatar: '/placeholder.svg?height=40&width=40' },
-    { id: 3, phoneNumber: '+1 (555) 246-8135', maxAmount: 1000, requiresConfirmation: true, requiresReason: true, avatar: '/placeholder.svg?height=40&width=40' },
-  ]);
+  const [drawers, setDrawers] = useState<Drawer[]>([]);
+  const [loading, setLoading] = useState(false);
   const [accounts, setAccounts] = useState<Account[]>([
     { id: 1, name: 'Checking Account', balance: 5000, maxAmount: 1000, requiresConfirmation: true, requiresReason: false, avatar: '/placeholder.svg?height=40&width=40' },
     { id: 2, name: 'Savings Account', balance: 10000, maxAmount: 2000, requiresConfirmation: true, requiresReason: true, avatar: '/placeholder.svg?height=40&width=40' },
@@ -54,16 +54,55 @@ const HomePage: React.FC = () => {
     fetchUser();
   }, []);
 
+   // Fetch drawees from the API
+   useEffect(() => {
+    const fetchDrawees = async () => {
+      setLoading(true);
+      try {
+        const draweesData = await getDrawees();
+        setDrawers(draweesData);
+      } catch (error) {
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDrawees();
+  }, []);
+
+  /// draweers
+  // Add new drawer using API
+  const handleAddDrawer = async () => {
+    const newDrawer = {
+      phone: '0728474740',
+      cycleLimit: 500,
+      cycleType: 'day',
+      requiresConfirmation: true,
+      requiresReason: true,
+    };
+
+    try {
+      const addedDrawer = await addDrawee(newDrawer);
+      setDrawers([...drawers, addedDrawer]);
+    } catch (error) {
+    }
+  };
+
+  // Remove drawer using API
+  const handleRemoveDrawer = async (id: number) => {
+    try {
+      await removeDrawee(id.toString());
+      setDrawers(drawers.filter(drawer => drawer.ID !== id));
+    } catch (error) {
+    }
+  };
+
+  const handleViewStatement = (id: number) => {
+    console.log(`View statement for drawee with id: ${id}`);
+  };
+
   const handleEditDrawer = (id: number) => {
     console.log(`Edit drawer with id: ${id}`);
-  };
-
-  const handleRemoveDrawer = (id: number) => {
-    setDrawers(drawers.filter(drawer => drawer.id !== id));
-  };
-
-  const handleAddDrawer = () => {
-    console.log('Add new drawer');
   };
 
   const handleWithdraw = (id: number) => {
@@ -78,10 +117,6 @@ const HomePage: React.FC = () => {
     console.log('Send money from wallet');
   };
 
-  const handleViewStatement = (id: number) => {
-    console.log(`View statement for drawer with id: ${id}`);
-  };
-
   const handleViewWalletStatement = () => {
     console.log('View wallet statement');
   };
@@ -92,13 +127,13 @@ const HomePage: React.FC = () => {
 
   const drawerActionMenu = (drawer: Drawer) => (
     <Menu>
-      <Menu.Item key="1" icon={<FileTextOutlined />} onClick={() => handleViewStatement(drawer.id)}>
+      <Menu.Item key="1" icon={<FileTextOutlined />} onClick={() => handleViewStatement(drawer.ID)}>
         View Statement
       </Menu.Item>
-      <Menu.Item key="2" icon={<EditOutlined />} onClick={() => handleEditDrawer(drawer.id)}>
+      <Menu.Item key="2" icon={<EditOutlined />} onClick={() => handleEditDrawer(drawer.ID)}>
         Edit
       </Menu.Item>
-      <Menu.Item key="3" icon={<DeleteOutlined />} onClick={() => handleRemoveDrawer(drawer.id)} danger>
+      <Menu.Item key="3" icon={<DeleteOutlined />} onClick={() => handleRemoveDrawer(drawer.ID)} danger>
         Remove
       </Menu.Item>
     </Menu>
@@ -151,7 +186,7 @@ const HomePage: React.FC = () => {
               dataSource={drawers}
               renderItem={drawer => (
                 <List.Item
-                  key={drawer.id}
+                  key={drawer.ID}
                   actions={[
                     <Dropdown overlay={drawerActionMenu(drawer)} trigger={['click']}>
                       <Button icon={<MoreOutlined />} type="text" />
@@ -160,14 +195,16 @@ const HomePage: React.FC = () => {
                   className="bg-orange-50 rounded-lg border border-orange-200 mb-2 p-2"
                 >
                   <List.Item.Meta
-                    avatar={<Avatar src={drawer.avatar} className="border border-orange-300" />}
-                    title={<Text strong className="text-orange-800">{drawer.phoneNumber}</Text>}
+                    avatar={<Avatar src={''} className="border border-orange-300" />}
+                    title={<Text strong className="text-orange-800">{drawer.Phone}</Text>}
                     description={
                       <>
-                        <Text className="text-orange-600">Max: KES {drawer.maxAmount}</Text>
+                        <Text className="text-orange-600">Max: KES {drawer.CycleLimit}</Text>
                         <br />
-                        {drawer.requiresConfirmation && <RequirementTag label="Confirmation" />}
-                        {drawer.requiresReason && <RequirementTag label="Reason" />}
+                        <Text className="text-orange-600">Limit: KES {drawer.Limit}</Text>
+                        <br />
+                        {drawer.RequiresConfirmation && <RequirementTag label="Confirmation" />}
+                        {drawer.RequiresReason && <RequirementTag label="Reason" />}
                       </>
                     }
                   />

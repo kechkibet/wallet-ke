@@ -194,7 +194,9 @@
           Loading resources
         </div>
         <div class="loading-sub-title">
+        <center>
           The initial loading of resources may take more time, please be patient.
+        </center>
         </div>
       </div>
     `;
