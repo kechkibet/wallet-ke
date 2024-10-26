@@ -44,36 +44,25 @@ const HomePage: React.FC = () => {
   const [drawers, setDrawers] = useState<Drawer[]>([]);
   const [loading, setLoading] = useState(false);
   const [accounts, setAccounts] = useState<Account[]>([
-    { id: 1, name: 'Checking Account', balance: 5000, maxAmount: 1000, requiresConfirmation: true, requiresReason: false, avatar: '/placeholder.svg?height=40&width=40' },
-    { id: 2, name: 'Savings Account', balance: 10000, maxAmount: 2000, requiresConfirmation: true, requiresReason: true, avatar: '/placeholder.svg?height=40&width=40' },
-  ]);
+    ]);
   const [isTopUpVisible, setTopUpVisible] = useState(false);
   const [isAddDrawerVisible, setAddDrawerVisible] = useState(false);
 
-  useEffect(() => {
-    const fetchUser = async () => {
+
+
+    // Refresh data function
+    const refreshData = async () => {
       const userInfo = await queryCurrentUser();
       setUser(userInfo);
-    };
-    fetchUser();
-  }, []);
-
-   // Fetch drawees from the API
-   useEffect(() => {
-    const fetchDrawees = async () => {
-      setLoading(true);
-      try {
-        const draweesData = await getDrawees();
-        setDrawers(draweesData);
-      } catch (error) {
-      } finally {
-        setLoading(false);
-      }
+      const draweesData = await getDrawees();
+      setDrawers(draweesData);
     };
 
-    fetchDrawees();
-  }, []);
 
+    // Initial data fetch on component mount
+    useEffect(() => {
+      refreshData();
+    }, []);
 
   // Remove drawer using API
   const handleRemoveDrawer = async (id: number) => {
@@ -241,8 +230,8 @@ const HomePage: React.FC = () => {
         </Tabs>
       </Card>
       
-      <TopUp visible={isTopUpVisible} onClose={() => setTopUpVisible(false)} />
-      <AddDrawer visible={isAddDrawerVisible} onClose={() => setAddDrawerVisible(false)} />
+      <TopUp visible={isTopUpVisible} onClose={() => {setTopUpVisible(false); refreshData();}} />
+      <AddDrawer visible={isAddDrawerVisible} onClose={() => {setAddDrawerVisible(false); refreshData();}} />
     </div>
   );
 };
