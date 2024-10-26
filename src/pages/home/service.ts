@@ -5,6 +5,7 @@ import { message } from 'antd';
 const GET_DRAWEES_URL = '/secured/viewDrawees';
 const ADD_DRAWEE_URL = '/secured/addDrawee';
 const REMOVE_DRAWEE_URL = '/secured/removeDrawee';
+const TOPUP_URL = '/secured/topup';
 
 /**
  * Gets the list of drawees.
@@ -43,7 +44,7 @@ export async function getDrawees(): Promise<any> {
  */
 export async function addDrawee(draweeData: {
   phone: string;
-  limit: number;
+  cycleLimit: number;
   cycleType: string;
   requiresConfirmation: boolean;
   requiresReason: boolean;
@@ -104,6 +105,34 @@ export async function removeDrawee(draweeId: string): Promise<any> {
     }
   } catch (error) {
     message.error('Network error occurred while removing drawee');
+    throw error;
+  }
+}
+
+export async function topup(amount: number): Promise<any> {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return;
+  }
+
+  try {
+    const response = await request(TOPUP_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      data: {'amount': amount },
+    });
+
+    if (response) {
+      return response;
+    } else {
+      message.error('Topup failed');
+      throw new Error('Topup failed');
+    }
+  } catch (error) {
+    message.error('Network error occurred on topup');
     throw error;
   }
 }

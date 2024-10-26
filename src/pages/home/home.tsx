@@ -10,8 +10,10 @@ import {
   FileTextOutlined,
   MoreOutlined,
 } from '@ant-design/icons';
-import { getDrawees, addDrawee, removeDrawee } from './service'; // Import APIs
+import { getDrawees, removeDrawee } from './service'; // Import APIs
 import { currentUser as queryCurrentUser } from '../../services/ant-design-pro/api';
+import TopUp from './topup';
+import AddDrawer from './add_drawer';
 const { TabPane } = Tabs;
 const { Title, Text } = Typography;
 
@@ -45,6 +47,8 @@ const HomePage: React.FC = () => {
     { id: 1, name: 'Checking Account', balance: 5000, maxAmount: 1000, requiresConfirmation: true, requiresReason: false, avatar: '/placeholder.svg?height=40&width=40' },
     { id: 2, name: 'Savings Account', balance: 10000, maxAmount: 2000, requiresConfirmation: true, requiresReason: true, avatar: '/placeholder.svg?height=40&width=40' },
   ]);
+  const [isTopUpVisible, setTopUpVisible] = useState(false);
+  const [isAddDrawerVisible, setAddDrawerVisible] = useState(false);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -70,23 +74,6 @@ const HomePage: React.FC = () => {
     fetchDrawees();
   }, []);
 
-  /// draweers
-  // Add new drawer using API
-  const handleAddDrawer = async () => {
-    const newDrawer = {
-      phone: '0728474740',
-      cycleLimit: 500,
-      cycleType: 'day',
-      requiresConfirmation: true,
-      requiresReason: true,
-    };
-
-    try {
-      const addedDrawer = await addDrawee(newDrawer);
-      setDrawers([...drawers, addedDrawer]);
-    } catch (error) {
-    }
-  };
 
   // Remove drawer using API
   const handleRemoveDrawer = async (id: number) => {
@@ -107,10 +94,6 @@ const HomePage: React.FC = () => {
 
   const handleWithdraw = (id: number) => {
     console.log(`Withdraw from account with id: ${id}`);
-  };
-
-  const handleTopUp = () => {
-    console.log('Top up wallet');
   };
 
   const handleSend = () => {
@@ -168,7 +151,7 @@ const HomePage: React.FC = () => {
               type="text"
               className="text-orange-600 hover:bg-orange-100"
             />
-              <Button type="primary" icon={<ArrowUpOutlined />} onClick={handleTopUp} className="bg-orange-500 hover:bg-orange-600">
+              <Button type="primary" icon={<ArrowUpOutlined />} onClick={() => setTopUpVisible(true)} className="bg-orange-500 hover:bg-orange-600">
                 Top Up
               </Button>
               <Button icon={<SendOutlined />} onClick={handleSend} className="bg-orange-400 text-white hover:bg-orange-500">
@@ -211,7 +194,7 @@ const HomePage: React.FC = () => {
                 </List.Item>
               )}
             />
-            <Button icon={<PlusOutlined />} onClick={handleAddDrawer} type="dashed" block className="mt-2">
+            <Button icon={<PlusOutlined />} onClick={() => setAddDrawerVisible(true)} type="dashed" block className="mt-2">
               Add drawer
             </Button>
           </TabPane>
@@ -257,6 +240,9 @@ const HomePage: React.FC = () => {
           </TabPane>
         </Tabs>
       </Card>
+      
+      <TopUp visible={isTopUpVisible} onClose={() => setTopUpVisible(false)} />
+      <AddDrawer visible={isAddDrawerVisible} onClose={() => setAddDrawerVisible(false)} />
     </div>
   );
 };
