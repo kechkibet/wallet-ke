@@ -35,7 +35,14 @@ export async function getInitialState(): Promise<{
       return enrichedUserInfo;
 
     } catch (error) {
-      history.push(loginPath);
+      if(history.location.pathname.includes('/draweeDraw'))
+        {
+          /// do nothing
+        }
+        else
+        {
+          history.push(loginPath);
+        }
     }
     return undefined;
   };

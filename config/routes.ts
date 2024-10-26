@@ -22,6 +22,12 @@ export default [
         component: './user/login',
       },
       {
+        path: '/user/draweeDraw/:subId',
+        layout: false,
+        name: 'drawee Draw',
+        component: './user/drawee_withdraw/index.tsx',
+      },
+      {
         path: '/user',
         redirect: '/user/login',
       },
