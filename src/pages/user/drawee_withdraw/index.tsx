@@ -53,7 +53,7 @@ const DraweeWithdraw: React.FC = () => {
             >
               <Input type="number" min={1} placeholder="Enter withdrawal amount" />
             </Form.Item>
-            <Form.Item name="reason" label="Reason">
+            <Form.Item name="reason" label="Reason"   rules={[{ required: true}]}>
               <Input placeholder="Optional reason for withdrawal" />
             </Form.Item>
           </LoginForm>
