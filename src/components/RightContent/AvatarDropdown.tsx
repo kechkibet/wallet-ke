@@ -61,6 +61,9 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
         }),
       });
     }
+
+    /// wipe token
+    localStorage.setItem('token','');
   };
 
 

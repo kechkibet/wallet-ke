@@ -30,10 +30,7 @@ export async function updateName(newName: string) {
 }
 /** 退出登录接口 POST /api/login/outLogin */
 export async function outLogin(options?: { [key: string]: any }) {
-  return request<Record<string, any>>('/api/login/outLogin', {
-    method: 'POST',
-    ...(options || {}),
-  });
+  return {};
 }
 
 /** 登录接口 POST /api/login/account */
