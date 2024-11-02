@@ -20,6 +20,7 @@ const { Title, Text } = Typography;
 interface Drawer {
   ID: number;
   Phone: string;
+  Name: string;
   Limit: number,
   RequiresConfirmation: boolean,
   RequiresReason: boolean,
@@ -168,7 +169,7 @@ const HomePage: React.FC = () => {
                 >
                   <List.Item.Meta
                     avatar={<Avatar src={''} className="border border-orange-300" />}
-                    title={<Text strong className="text-orange-800">{drawer.Phone}</Text>}
+                    title={<Text strong className="text-orange-800">{drawer.Name} {drawer.Phone}</Text>}
                     description={
                       <>
                         <Text className="text-orange-600">Max: KES {drawer.CycleLimit}</Text>
