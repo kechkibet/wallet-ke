@@ -28,7 +28,6 @@ export async function getInitialState(): Promise<{
       /// enriched the data
       const enrichedUserInfo = {
         ...msg,
-        name: msg.phone,
         avatar: 'https://cdn-icons-png.freepik.com/256/428/428573.png'
       };
 

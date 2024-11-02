@@ -1,10 +1,10 @@
-import { outLogin } from '@/services/ant-design-pro/api';
+import { outLogin,updateName } from '@/services/ant-design-pro/api';
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import { history, useModel } from '@umijs/max';
-import { Spin } from 'antd';
+import { Spin, Modal, Button, message, Input } from 'antd';
 import { createStyles } from 'antd-style';
 import { stringify } from 'querystring';
-import React, { useCallback } from 'react';
+import React, { useCallback,useState } from 'react';
 import { flushSync } from 'react-dom';
 import HeaderDropdown from '../HeaderDropdown';
 
@@ -16,7 +16,7 @@ export type GlobalHeaderRightProps = {
 export const AvatarName = () => {
   const { initialState } = useModel('@@initialState');
   const { currentUser } = initialState || {};
-  return <span className="anticon">{currentUser?.name}</span>;
+  return <span className="anticon">{currentUser?.name == '' ? "UPDATE NAME": currentUser?.name}</span>;
 };
 
 const useStyles = createStyles(({ token }) => {
@@ -41,6 +41,11 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
   /**
    * 退出登录，并且将当前的 url 保存
    */
+
+  const [showUpdateNameModal, setShowUpdateNameModal] = useState(false);
+  const [newName, setNewName] = useState('');
+  const [loading, setLoading] = useState(false);
+
   const loginOut = async () => {
     await outLogin();
     const { search, pathname } = window.location;
@@ -57,6 +62,26 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
       });
     }
   };
+
+
+  /// update name 
+  const handleUpdateName = async () => {
+    setLoading(true);
+    try {
+      await updateName(newName);
+      message.success('Name updated successfully');
+      setInitialState((s) => ({
+        ...s,
+        currentUser: { ...s.currentUser, name: newName },
+      }));
+      setShowUpdateNameModal(false);
+    } catch (error) {
+      message.error('Failed to update name');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const { styles } = useStyles();
 
   const { initialState, setInitialState } = useModel('@@initialState');
@@ -71,30 +96,33 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
         loginOut();
         return;
       }
+      if (key === 'update name') {
+        setShowUpdateNameModal(true);
+        return;
+      }
       history.push(`/account/${key}`);
     },
     [setInitialState],
   );
 
-  const loading = (
-    <span className={styles.action}>
-      <Spin
-        size="small"
-        style={{
-          marginLeft: 8,
-          marginRight: 8,
-        }}
-      />
-    </span>
-  );
 
   if (!initialState) {
-    return loading;
+    return (
+      <span className={styles.action}>
+        <Spin
+          size="small"
+          style={{
+            marginLeft: 8,
+            marginRight: 8,
+          }}
+        />
+      </span>
+    );
   }
 
   const { currentUser } = initialState;
 
-  if (!currentUser || !currentUser.name) {
+  if (!currentUser) {
     return loading;
   }
 
@@ -116,14 +144,21 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
           },
         ]
       : []),
+     
+    currentUser.name !='' ? null: {
+      key: 'update name',
+      icon: <UserOutlined />,
+      label: 'Update Name',
+    },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
-      label: '退出登录',
+      label: 'Logout',
     },
   ];
 
   return (
+    <>
     <HeaderDropdown
       menu={{
         selectedKeys: [],
@@ -133,5 +168,28 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
     >
       {children}
     </HeaderDropdown>
+
+    {/* Update Name Modal */}
+    <Modal
+        title="Update Name"
+        open={showUpdateNameModal}
+        onCancel={() => setShowUpdateNameModal(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setShowUpdateNameModal(false)}>
+            Cancel
+          </Button>,
+          <Button key="submit" type="primary" loading={loading} onClick={handleUpdateName}>
+            Update
+          </Button>,
+        ]}
+      >
+        <Input
+          placeholder="Enter new name"
+          value={newName}
+          onChange={(e) => setNewName(e.target.value)}
+          disabled={loading}
+        />
+      </Modal>
+    </>
   );
 };

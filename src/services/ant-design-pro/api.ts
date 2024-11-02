@@ -15,6 +15,19 @@ export async function currentUser(options?: { [key: string]: any }) {
   });
 }
 
+
+/** UPDATE owner of wallet  name  */
+/** Update Name API POST /secured/update */
+export async function updateName(newName: string) {
+  return request('/secured/update', {
+    method: 'POST',
+    headers: {
+      Authorization: localStorage.getItem("token") ?? '',
+      'Content-Type': 'application/json',
+    },
+    data: { name: newName },
+  });
+}
 /** 退出登录接口 POST /api/login/outLogin */
 export async function outLogin(options?: { [key: string]: any }) {
   return request<Record<string, any>>('/api/login/outLogin', {
