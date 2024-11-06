@@ -63,7 +63,7 @@ const DraweeWithdraw: React.FC = () => {
     const { amount, reason } = values;
 
     try {
-      const result = await draweeWithdraw(stubId, amount, reason);
+      const result = await draweeWithdraw(stubId, Number(amount), reason);
       if (result) {
         message.success(result.message);
       }
