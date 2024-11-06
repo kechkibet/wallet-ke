@@ -92,7 +92,13 @@ const DraweeWithdraw: React.FC = () => {
                 <Form.Item
                   name="amount"
                   label="Amount (KES)"
-                  rules={[{ required: true, message: 'Please enter a valid amount' }]}
+                  rules={[{ required: true, message: 'Please enter a valid amount' }
+                  ,
+                  {
+                    validator: (_, value) =>
+                      value >= 1 ? Promise.resolve() : Promise.reject('Amount must be at least 1 KSH'),
+                  }
+                  ]}
                 >
                   <Input type="number" min={1} placeholder="Enter withdrawal amount" />
                 </Form.Item>
