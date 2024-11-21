@@ -145,7 +145,7 @@ const HomePage: React.FC = () => {
               <Button type="primary" icon={<ArrowUpOutlined />} onClick={() => setTopUpVisible(true)} className="bg-orange-500 hover:bg-orange-600">
                 Top Up
               </Button>
-              <Button disabled={true} icon={<SendOutlined />} onClick={handleSend} className="bg-orange-400 text-white hover:bg-orange-500">
+              <Button disabled={false} icon={<SendOutlined />} onClick={handleSend} className="bg-orange-400 text-white hover:bg-orange-500">
                 Send
               </Button>
             </Space>
