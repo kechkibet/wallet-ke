@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: wallet-ke
+  name: wallet-ke-frontend
 spec:
   selector:
     matchLabels:
-      app: wallet-ke
+      app: wallet-ke-frontend
   template:
     metadata:
       labels:
-        app: wallet-ke
+        app: wallet-ke-frontend
     spec:
       containers:
-        - name: wallet-ke
+        - name: wallet-ke-frontend
           image: <IMAGE>
           # resources:
           #   limits:
@@ -24,10 +24,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: wallet-ke-service
+  name: wallet-ke-frontend-service
 spec:
   selector:
-    app: wallet-ke
+    app: wallet-ke-frontend
   ports:
     - port: 80
       targetPort: 80
@@ -36,9 +36,9 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: wallet-ke-ingress-dev
+  name: wallet-ke-frontend-ingress-dev
   labels:
-    name: wallet-ke-ingress-dev
+    name: wallet-ke-frontend-ingress-dev
   annotations:
     cert-manager.io/issuer: letsencrypt
     kubernetes.io/ingress.class: nginx
@@ -51,13 +51,13 @@ spec:
             path: "/"
             backend:
               service:
-                name: wallet-ke-service
+                name: wallet-ke-frontend-service
                 port:
                   number: 80
   tls:
     - hosts:
         - app.wallet.ke
-      secretName: nsbf-dev-frontend-dev-lencr-secret
+      secretName: wallet-ke-frontend-secret
 ---
 
 apiVersion: cert-manager.io/v1
