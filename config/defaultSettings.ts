@@ -15,7 +15,7 @@ const Settings: ProLayoutProps & {
   fixedHeader: false,
   fixSiderbar: true,
   colorWeak: false,
-  title: 'Orange Wallet',
+  title: 'Wallet KE',
   pwa: true,
   logo: '/pro_icon.svg',
   iconfontUrl: '',

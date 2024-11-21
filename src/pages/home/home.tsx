@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Tabs, Button, List, Avatar, Tag, Typography, Space, Row, Col, Dropdown, Menu } from 'antd';
+import { Card, Tabs, Button, List, Avatar, Tag, Typography, Space, Row, Col, Dropdown, Menu,Progress } from 'antd';
 import {
   EditOutlined,
   DeleteOutlined,
@@ -100,10 +100,10 @@ const HomePage: React.FC = () => {
 
   const drawerActionMenu = (drawer: Drawer) => (
     <Menu>
-      <Menu.Item key="1" icon={<FileTextOutlined />} onClick={() => handleViewStatement(drawer.ID)}>
+      <Menu.Item key="1" disabled={true} icon={<FileTextOutlined />} onClick={() => handleViewStatement(drawer.ID)}>
         View Statement
       </Menu.Item>
-      <Menu.Item key="2" icon={<EditOutlined />} onClick={() => handleEditDrawer(drawer.ID)}>
+      <Menu.Item key="2" disabled={true} icon={<EditOutlined />} onClick={() => handleEditDrawer(drawer.ID)}>
         Edit
       </Menu.Item>
       <Menu.Item key="3" icon={<DeleteOutlined />} onClick={() => handleRemoveDrawer(drawer.ID)} danger>
@@ -136,6 +136,7 @@ const HomePage: React.FC = () => {
           <Col xs={24} sm={12} className="text-right">
             <Space>
             <Button
+              disabled={true}
               icon={<FileTextOutlined />}
               onClick={handleViewWalletStatement}
               type="text"
@@ -144,7 +145,7 @@ const HomePage: React.FC = () => {
               <Button type="primary" icon={<ArrowUpOutlined />} onClick={() => setTopUpVisible(true)} className="bg-orange-500 hover:bg-orange-600">
                 Top Up
               </Button>
-              <Button icon={<SendOutlined />} onClick={handleSend} className="bg-orange-400 text-white hover:bg-orange-500">
+              <Button disabled={true} icon={<SendOutlined />} onClick={handleSend} className="bg-orange-400 text-white hover:bg-orange-500">
                 Send
               </Button>
             </Space>
@@ -168,14 +169,22 @@ const HomePage: React.FC = () => {
                   className="bg-orange-50 rounded-lg border border-orange-200 mb-2 p-2"
                 >
                   <List.Item.Meta
-                    avatar={<Avatar src={''} className="border border-orange-300" />}
+                    avatar={
+                      <div>
+                        <Progress
+                          type="circle"
+                          percent={(drawer.CycleUsed / drawer.CycleLimit) * 100}
+                          format={(percent) => `${drawer.CycleUsed} / ${drawer.CycleLimit} KES`}
+                          strokeColor='#FF8C00'                            
+                          trailColor="#FFE4B3"
+                          strokeWidth={10}
+                          size={50}
+                        />
+                      </div>
+                    }
                     title={<Text strong className="text-orange-800">{drawer.Name} {drawer.Phone}</Text>}
                     description={
                       <>
-                        <Text className="text-orange-600">Max: KES {drawer.CycleLimit}</Text>
-                        <br />
-                        <Text className="text-orange-600">Limit: KES {drawer.Limit}</Text>
-                        <br />
                         {drawer.RequiresConfirmation && <RequirementTag label="Confirmation" />}
                         {drawer.RequiresReason && <RequirementTag label="Reason" />}
                       </>
