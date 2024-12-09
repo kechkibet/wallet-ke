@@ -34,7 +34,7 @@ export async function getInitialState(): Promise<{
       return enrichedUserInfo;
 
     } catch (error) {
-      if(history.location.pathname.includes('/draweeDraw'))
+      if(history.location.pathname.includes('/dd'))
         {
           /// do nothing
         }
