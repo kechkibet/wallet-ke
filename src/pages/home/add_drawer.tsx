@@ -11,25 +11,17 @@ interface AddDrawerProps {
 }
 
 const AddDrawer: React.FC<AddDrawerProps> = ({ visible, onClose }) => {
-  const [drawerData, setDrawerData] = useState({
-    phone: '',
-    cycleLimit: 0,
-    limit: 0,
-    requiresConfirmation: false,
-    requiresReason: false,
-    cycleType: 'month',
-    name: '',
-  });
-
+  const [form] = Form.useForm(); // Form instance for better control
   const [loading, setLoading] = useState(false); // Loading state for button
 
-  const handleAddDrawer = async () => {
+  const handleAddDrawer = async (values: any) => {
     try {
       setLoading(true);
-      const result = await addDrawee(drawerData);
+      const result = await addDrawee(values); // Use form values directly
       if (result) {
         message.success(`Add Drawee Success`);
         onClose();
+        form.resetFields(); // Reset the form after successful submission
       }
     } catch (error) {
       message.error('Failed to add drawee');
@@ -49,7 +41,9 @@ const AddDrawer: React.FC<AddDrawerProps> = ({ visible, onClose }) => {
         if (contacts && contacts.length > 0) {
           const contact = contacts[0];
           const phone = contact.tel?.[0] || '';
-          setDrawerData({ ...drawerData, phone });
+          const name = contact.name || '';
+          // Update the form fields with the selected contact
+          form.setFieldsValue({ phone, name });
         }
       } catch (error) {
         message.error('Contact Picker API not supported or canceled by the user.');
@@ -61,9 +55,26 @@ const AddDrawer: React.FC<AddDrawerProps> = ({ visible, onClose }) => {
 
   return (
     <Modal title="Add Drawer" open={visible} onCancel={onClose} footer={null}>
-      <Form layout="vertical" onFinish={handleAddDrawer}>
-        <Form.Item label="Name" name="name" rules={[{ required: true, message: 'Please enter name' }]}>
-          <Input onChange={(e) => setDrawerData({ ...drawerData, name: e.target.value })} />
+      <Form
+        form={form}
+        layout="vertical"
+        onFinish={handleAddDrawer}
+        initialValues={{
+          phone: '',
+          cycleLimit: 10,
+          limit: 1,
+          requiresConfirmation: false,
+          requiresReason: false,
+          cycleType: 'month',
+          name: '',
+        }}
+      >
+        <Form.Item
+          label="Name"
+          name="name"
+          rules={[{ required: true, message: 'Please enter name' }]}
+        >
+          <Input placeholder="Enter name" />
         </Form.Item>
         <Form.Item
           label="Phone"
@@ -74,6 +85,7 @@ const AddDrawer: React.FC<AddDrawerProps> = ({ visible, onClose }) => {
           ]}
         >
           <Input
+            placeholder="Enter phone"
             addonAfter={
               <Button
                 type="text"
@@ -82,12 +94,10 @@ const AddDrawer: React.FC<AddDrawerProps> = ({ visible, onClose }) => {
                 style={{ padding: 0 }}
               />
             }
-            value={drawerData.phone}
-            onChange={(e) => setDrawerData({ ...drawerData, phone: e.target.value })}
           />
         </Form.Item>
         <Form.Item label="Cycle Type" name="cycleType" rules={[{ required: true }]}>
-          <Select onChange={(value) => setDrawerData({ ...drawerData, cycleType: value })}>
+          <Select>
             <Option value="day">Day</Option>
             <Option value="week">Week</Option>
             <Option value="month">Month</Option>
@@ -105,28 +115,20 @@ const AddDrawer: React.FC<AddDrawerProps> = ({ visible, onClose }) => {
             },
           ]}
         >
-          <Input
-            type="number"
-            min={10}
-            onChange={(e) => setDrawerData({ ...drawerData, cycleLimit: Number(e.target.value) })}
-          />
+          <Input type="number" min={10} placeholder="Enter cycle limit" />
         </Form.Item>
-        <Form.Item label="Limit" name="limit" rules={[{ required: true, message: 'Please enter a limit' }]}>
-          <Input
-            type="number"
-            min={1}
-            onChange={(e) => setDrawerData({ ...drawerData, limit: Number(e.target.value) })}
-          />
+        <Form.Item
+          label="Limit"
+          name="limit"
+          rules={[{ required: true, message: 'Please enter a limit' }]}
+        >
+          <Input type="number" min={1} placeholder="Enter limit" />
         </Form.Item>
         <Form.Item name="requiresConfirmation" valuePropName="checked">
-          <Checkbox onChange={(e) => setDrawerData({ ...drawerData, requiresConfirmation: e.target.checked })}>
-            Requires Confirmation
-          </Checkbox>
+          <Checkbox>Requires Confirmation</Checkbox>
         </Form.Item>
         <Form.Item name="requiresReason" valuePropName="checked">
-          <Checkbox onChange={(e) => setDrawerData({ ...drawerData, requiresReason: e.target.checked })}>
-            Requires Reason
-          </Checkbox>
+          <Checkbox>Requires Reason</Checkbox>
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" loading={loading} disabled={loading} block>
