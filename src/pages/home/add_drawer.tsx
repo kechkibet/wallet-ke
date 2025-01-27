@@ -40,7 +40,7 @@ const AddDrawer: React.FC<AddDrawerProps> = ({ visible, onClose }) => {
         );
         if (contacts && contacts.length > 0) {
           const contact = contacts[0];
-          const phone = contact.tel?.[0] || '';
+          const phone = contact.tel?.[0].replace(/\s+/g, '').replace(/^\+254/, '0') || '';
           const name = contact.name || '';
           // Update the form fields with the selected contact
           form.setFieldsValue({ phone, name });
