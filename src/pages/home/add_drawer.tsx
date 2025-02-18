@@ -17,7 +17,13 @@ const AddDrawer: React.FC<AddDrawerProps> = ({ visible, onClose }) => {
   const handleAddDrawer = async (values: any) => {
     try {
       setLoading(true);
-      const result = await addDrawee(values); // Use form values directly
+      // Convert limit and cycleLimit to numbers
+      const processedValues = {
+        ...values,
+        limit: Number(values.limit),
+        cycleLimit: Number(values.cycleLimit)
+      };
+      const result = await addDrawee(processedValues);
       if (result) {
         message.success(`Add Drawee Success`);
         onClose();
