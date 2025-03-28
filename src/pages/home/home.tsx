@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Tabs, Button, List, Avatar, Tag, Typography, Space, Row, Col, Dropdown, Menu, Progress } from 'antd';
+import { Card, Tabs, Button, List, Avatar, Tag, Typography, Space, Row, Col, Dropdown, Menu, Progress, Modal } from 'antd'; // Import Modal for confirmation
 import {
   EditOutlined,
   DeleteOutlined,
@@ -66,11 +66,21 @@ const HomePage: React.FC = () => {
 
   // Remove drawer using API
   const handleRemoveDrawer = async (id: number) => {
-    try {
-      await removeDrawee(id.toString());
-      setDrawers(drawers.filter(drawer => drawer.ID !== id));
-    } catch (error) {
-    }
+    Modal.confirm({
+      title: 'Are you sure you want to remove this drawer?',
+      content: 'This action cannot be undone.',
+      okText: 'Yes, Remove',
+      okType: 'danger',
+      cancelText: 'Cancel',
+      onOk: async () => {
+        try {
+          await removeDrawee(id.toString());
+          setDrawers(drawers.filter(drawer => drawer.ID !== id));
+        } catch (error) {
+          console.error('Failed to remove drawer:', error);
+        }
+      },
+    });
   };
 
   const handleViewStatement = (id: number) => {
