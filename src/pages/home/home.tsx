@@ -15,6 +15,7 @@ import { currentUser as queryCurrentUser } from '../../services/ant-design-pro/a
 import TopUp from './topup';
 import AddDrawer from './add_drawer';
 import EditDrawer from './edit_drawer'; // Import the EditDrawer component
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 const { TabPane } = Tabs;
 const { Title, Text } = Typography;
 
@@ -41,6 +42,7 @@ interface Account {
 }
 
 const HomePage: React.FC = () => {
+  const navigate = useNavigate(); // Initialize navigate
   const [user, setUser] = useState({});
   const [activeTab, setActiveTab] = useState<'drawers' | 'accounts'>('drawers');
   const [drawers, setDrawers] = useState<Drawer[]>([]);
@@ -84,7 +86,7 @@ const HomePage: React.FC = () => {
   };
 
   const handleViewStatement = (id: number) => {
-    console.log(`View statement for drawee with id: ${id}`);
+    navigate(`/drawee-statement/${id}`); // Navigate to the Drawee Statement page
   };
 
   const handleEditDrawer = (id: number) => {
@@ -113,7 +115,7 @@ const HomePage: React.FC = () => {
 
   const drawerActionMenu = (drawer: Drawer) => (
     <Menu>
-      <Menu.Item key="1" disabled={true} icon={<FileTextOutlined />} onClick={() => handleViewStatement(drawer.ID)}>
+      <Menu.Item key="1" icon={<FileTextOutlined />} onClick={() => handleViewStatement(drawer.ID)}>
         View Statement
       </Menu.Item>
       <Menu.Item key="2" icon={<EditOutlined />} onClick={() => handleEditDrawer(drawer.ID)}>
