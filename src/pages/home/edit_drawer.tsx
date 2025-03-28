@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Modal, Form, Input, Select, Button, message } from 'antd';
 
+import { editDrawee } from './service';
+import localeValues from 'antd/es/locale/en_US';
+
 const { Option } = Select;
 
 interface Drawer {
@@ -29,12 +32,19 @@ const EditDrawer: React.FC<EditDrawerProps> = ({ visible, drawer, onClose }) => 
     try {
       setLoading(true);
     const values = await form.validateFields();
-    if (!form.isFieldsTouched(true)) {
+    if (!form.isFieldsTouched(false)) {
       message.info('No changes detected.');
       return;
     }
-      console.log('Updated drawer values:', { ...drawer, ...values });
+    // Convert cycleLimit and limit to numbers if they are strings
+    if (typeof values.cycleLimit === 'string') {
+      values.cycleLimit = parseFloat(values.cycleLimit);
+    }
+    if (typeof values.limit === 'string') {
+      values.limit = parseFloat(values.limit);
+    }
       // TODO: Call API to save the updated drawer details
+      await editDrawee({draweeId: drawer?.ID, ...values});
       message.success('Drawer updated successfully!');
       onClose();
     } catch (error) {

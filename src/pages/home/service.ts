@@ -4,6 +4,7 @@ import { message } from 'antd';
 // API endpoints (base URLs will be added in the main configuration)
 const GET_DRAWEES_URL = '/secured/viewDrawees';
 const ADD_DRAWEE_URL = '/secured/addDrawee';
+const EDIT_DRAWEE_URL = '/secured/editDrawee';
 const REMOVE_DRAWEE_URL = '/secured/removeDrawee';
 const TOPUP_URL = '/secured/topup';
 
@@ -44,7 +45,7 @@ export async function getDrawees(): Promise<any> {
  */
 export async function addDrawee(draweeData: {
   phone: string;
-  cycleLimit: number;
+  limit: number;
   cycleType: string;
   requiresConfirmation: boolean;
   requiresReason: boolean;
@@ -72,6 +73,43 @@ export async function addDrawee(draweeData: {
     }
   } catch (error) {
     message.error('Network error occurred while adding drawee');
+    throw error;
+  }
+}
+
+/**
+ * Edits an existing drawee.
+ * @param draweeData The drawee data including cycleLimit, cycleType, and limit.
+ * @returns A promise that resolves with the response of the API call.
+ */
+export async function editDrawee(draweeData: {
+  cycleLimit: number;
+  cycleType: string;
+  limit: number;
+}): Promise<any> {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return;
+  }
+
+  try {
+    const response = await request(EDIT_DRAWEE_URL, {
+      method: 'POST',
+      headers: {
+        'Authorization': token,
+        'Content-Type': 'application/json',
+      },
+      data: draweeData,
+    });
+
+    if (response) {
+      return response;
+    } else {
+      message.error('Failed to edit drawee');
+      throw new Error('Failed to edit drawee');
+    }
+  } catch (error) {
+    message.error('Network error occurred while editing drawee');
     throw error;
   }
 }

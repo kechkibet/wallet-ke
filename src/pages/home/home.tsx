@@ -25,7 +25,7 @@ interface Drawer {
   Limit: number,
   RequiresConfirmation: boolean,
   RequiresReason: boolean,
-  CycleLimit: 500,
+  CycleLimit: number,
   CycleType: string,
   CycleUsed: number
 }
