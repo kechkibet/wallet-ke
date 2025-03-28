@@ -55,6 +55,10 @@ export default [
     name: 'drawee Draw',
     component: './user/drawee_withdraw/index.tsx',
   },
+  {
+    path: '/drawee-statement/:id',
+    component: './drawee-statement/index.tsx',
+  },
   // {
   //   path: '/dashboard',
   //   name: 'dashboard',
