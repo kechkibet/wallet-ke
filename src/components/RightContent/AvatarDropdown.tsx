@@ -1,10 +1,10 @@
-import { outLogin,updateName } from '@/services/ant-design-pro/api';
+import { outLogin, updateName } from '@/services/ant-design-pro/api';
 import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
 import { history, useModel } from '@umijs/max';
 import { Spin, Modal, Button, message, Input } from 'antd';
 import { createStyles } from 'antd-style';
 import { stringify } from 'querystring';
-import React, { useCallback,useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { flushSync } from 'react-dom';
 import HeaderDropdown from '../HeaderDropdown';
 
@@ -16,7 +16,7 @@ export type GlobalHeaderRightProps = {
 export const AvatarName = () => {
   const { initialState } = useModel('@@initialState');
   const { currentUser } = initialState || {};
-  return <span className="anticon">{currentUser?.name == '' ? "UPDATE NAME": currentUser?.name}</span>;
+  return <span className="anticon">{currentUser?.name == '' ? 'UPDATE NAME' : currentUser?.name}</span>;
 };
 
 const useStyles = createStyles(({ token }) => {
@@ -45,6 +45,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
   const [showUpdateNameModal, setShowUpdateNameModal] = useState(false);
   const [newName, setNewName] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const loginOut = async () => {
     await outLogin();
@@ -63,11 +64,10 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
     }
 
     /// wipe token
-    localStorage.setItem('token','');
+    localStorage.setItem('token', '');
   };
 
-
-  /// update name 
+  /// update name
   const handleUpdateName = async () => {
     setLoading(true);
     try {
@@ -93,10 +93,7 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
     (event: any) => {
       const { key } = event;
       if (key === 'logout') {
-        flushSync(() => {
-          setInitialState((s) => ({ ...s, currentUser: undefined }));
-        });
-        loginOut();
+        setShowLogoutConfirm(true);
         return;
       }
       if (key === 'update name') {
@@ -107,7 +104,6 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
     },
     [setInitialState],
   );
-
 
   if (!initialState) {
     return (
@@ -147,8 +143,8 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
           },
         ]
       : []),
-     
-    currentUser.name !='' ? null: {
+
+    currentUser.name != '' ? null : {
       key: 'update name',
       icon: <UserOutlined />,
       label: 'Update Name',
@@ -162,18 +158,18 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
 
   return (
     <>
-    <HeaderDropdown
-      menu={{
-        selectedKeys: [],
-        onClick: onMenuClick,
-        items: menuItems,
-      }}
-    >
-      {children}
-    </HeaderDropdown>
+      <HeaderDropdown
+        menu={{
+          selectedKeys: [],
+          onClick: onMenuClick,
+          items: menuItems,
+        }}
+      >
+        {children}
+      </HeaderDropdown>
 
-    {/* Update Name Modal */}
-    <Modal
+      {/* Update Name Modal */}
+      <Modal
         title="Update Name"
         open={showUpdateNameModal}
         onCancel={() => setShowUpdateNameModal(false)}
@@ -192,6 +188,33 @@ export const AvatarDropdown: React.FC<GlobalHeaderRightProps> = ({ menu, childre
           onChange={(e) => setNewName(e.target.value)}
           disabled={loading}
         />
+      </Modal>
+
+      {/* Logout Confirmation Modal */}
+      <Modal
+        title="Confirm Logout"
+        open={showLogoutConfirm}
+        onCancel={() => setShowLogoutConfirm(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setShowLogoutConfirm(false)}>
+            Cancel
+          </Button>,
+          <Button
+            key="confirm"
+            type="primary"
+            onClick={() => {
+              flushSync(() => {
+                setInitialState((s) => ({ ...s, currentUser: undefined }));
+              });
+              loginOut();
+              setShowLogoutConfirm(false);
+            }}
+          >
+            Logout
+          </Button>,
+        ]}
+      >
+        <p>Are you sure you want to log out?</p>
       </Modal>
     </>
   );
