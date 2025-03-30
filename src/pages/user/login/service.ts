@@ -1,7 +1,7 @@
 import { request } from '@umijs/max';
 import { message } from 'antd';
 
-import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
+import { startRegistration, startAuthentication,  } from '@simplewebauthn/browser';
 
 // API endpoints (base URLs are not included, assuming they'll be added in the main configuration)
 const SEND_OTP_URL = '/sendOtp';
