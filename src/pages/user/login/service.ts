@@ -102,8 +102,10 @@ export async function verifyOtp(correlationId: string, code: string): Promise<an
         return;
       }
       const sessionId = response.sessionId;
+      const options = {optionsJSON: {allowCredentials:[], hints:[], ...response.options.publicKey}}
+      console.log('WebAuthn login options:', options);
 
-      const assertion = await startAuthentication({optionsJSON: response.options.publicKey});
+      const assertion = await startAuthentication(options);
 
       const finishResponse = await request(`/webauthn/login/finish?sessionId=${encodeURIComponent(sessionId)}`, {
         method: 'POST',
