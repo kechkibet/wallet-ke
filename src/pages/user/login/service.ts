@@ -92,28 +92,34 @@ export async function verifyOtp(correlationId: string, code: string): Promise<an
 
   export const handleWebAuthnLogin = async () => {
     try {
-      const response = await request('/secured/webauthn/login/start', {
+      const response = await request('/webauthn/login/start', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token') || "" },
         data: JSON.stringify({ token: localStorage.getItem('token') }),
       });
-      const options = await response.json();
+      if (!response) {
+        console.log('Failed to start WebAuthn login');
+        return;
+      }
+      const sessionId = response.sessionId;
 
-      const assertion = await startAuthentication(options);
+      const assertion = await startAuthentication({optionsJSON: response.options.publicKey});
 
-      const finishResponse = await request('/secured/webauthn/login/finish', {
+      const finishResponse = await request(`/webauthn/login/finish?sessionId=${encodeURIComponent(sessionId)}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         data: JSON.stringify(assertion),
       });
 
-      if (finishResponse.ok) {
-        message.success('WebAuthn login successful!');
+      if (finishResponse) {
+        message.success('Login successful!');
+        localStorage.setItem('token', finishResponse.token);
         window.location.href = '/';
       } else {
-        message.error('WebAuthn login failed.');
+        message.error('Login failed.');
       }
     } catch (error) {
-      message.error('An error occurred during WebAuthn login.');
+      console.log(error);
+      message.error('Could not login via Biometrics: ' + error.message);
     }
   };
