@@ -1,6 +1,8 @@
 import { request } from '@umijs/max';
 import { message } from 'antd';
 
+import { startRegistration, startAuthentication,  } from '@simplewebauthn/browser';
+
 // API endpoints (base URLs are not included, assuming they'll be added in the main configuration)
 const SEND_OTP_URL = '/sendOtp';
 const VERIFY_OTP_URL = '/verifyOtp';
@@ -53,3 +55,71 @@ export async function verifyOtp(correlationId: string, code: string): Promise<an
     throw error;
   }
 }
+
+  export const handleWebAuthnRegistration = async () => {
+    try {
+      const response = await request('/secured/webauthn/register/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token') || "" },
+        body: JSON.stringify({ token: localStorage.getItem('token') }),
+      });
+      if (!response) {
+        message.error('Failed to edit drawee');
+        throw new Error('Failed to edit drawee');
+      }
+      console.log(response);
+      const attestation = await startRegistration({optionsJSON: response.publicKey});
+
+      console.log(attestation);
+
+      const finishResponse = await request('/secured/webauthn/register/finish', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token') || "" },
+        data: JSON.stringify(attestation),
+      });
+      console.log(finishResponse);
+
+      if (finishResponse) {
+        message.success('WebAuthn registration successful!');
+      } else {
+        message.error('WebAuthn registration failed.');
+      }
+    } catch (error) {
+      console.log(error);
+      message.error('An error occurred during WebAuthn registration.');
+    }
+  };
+
+  export const handleWebAuthnLogin = async () => {
+    try {
+      const response = await request('/webauthn/login/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token') || "" },
+        data: JSON.stringify({ token: localStorage.getItem('token') }),
+      });
+      if (!response) {
+        console.log('Failed to start WebAuthn login');
+        return;
+      }
+      const sessionId = response.sessionId;
+
+      const assertion = await startAuthentication({optionsJSON: response.options.publicKey});
+
+      const finishResponse = await request(`/webauthn/login/finish?sessionId=${encodeURIComponent(sessionId)}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        data: JSON.stringify(assertion),
+      });
+
+      if (finishResponse) {
+        message.success('Login successful!');
+        localStorage.setItem('token', finishResponse.token);
+        window.location.href = '/';
+      } else {
+        message.error('Login failed.');
+      }
+    } catch (error) {
+      console.log(error);
+      message.error('Could not login via Biometrics: ' + error.message);
+    }
+  };

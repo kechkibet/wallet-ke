@@ -1,11 +1,17 @@
-import { sendOtp, verifyOtp } from './service';
+import { sendOtp, verifyOtp, handleWebAuthnLogin, handleWebAuthnRegistration } from './service';
 import { MobileOutlined, LockOutlined } from '@ant-design/icons';
 import { LoginForm, ProFormCaptcha, ProFormText } from '@ant-design/pro-components';
-import { Helmet, useIntl} from '@umijs/max';
-import { message, Tabs,Row,Col } from 'antd';
-import React, { useRef,useState } from 'react';
+import { Helmet, useIntl } from '@umijs/max';
+import { message, Tabs, Row, Col, Modal, Divider, Space } from 'antd';
+import React, { useRef, useState } from 'react';
 import Settings from '../../../../config/defaultSettings';
 import PageTheme from '@/components/PageTheme';
+
+import {
+  UnlockOutlined,
+} from '@ant-design/icons';
+
+import { browserSupportsWebAuthn } from '@simplewebauthn/browser';
 
 const Login: React.FC = () => {
   const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
@@ -13,7 +19,7 @@ const Login: React.FC = () => {
   const [correlationId, setCorrelationId] = useState<string | null>(null); // Correlation ID for OTP verification
   const intl = useIntl();
   const formRef = useRef<any>(null); // Reference to the form
-  
+
   const handleSubmit = async (values: { mobile: string; otp: string }) => {
     try {
       // Verify OTP
@@ -28,25 +34,42 @@ const Login: React.FC = () => {
         // Save the token to local storage
         localStorage.setItem('token', result.token);
         message.success(intl.formatMessage({ id: 'pages.login.success', defaultMessage: 'Login successful!' }));
-        // Redirect after successful login
-        window.location.href = '/';
+
+        if (browserSupportsWebAuthn()) {
+          // Confirm before triggering WebAuthn registration
+          Modal.confirm({
+            title: 'Enable Biometric Login',
+            content: 'Do you want to enable biometric login?',
+            onOk: async () => {
+              await handleWebAuthnRegistration();
+              // Redirect after successful login
+              window.location.href = '/';
+            },
+            onCancel: () => {
+              // Redirect without enabling biometric login
+              window.location.href = '/';
+            },
+          });
+        } else {
+          window.location.href = '/';
+        }
       } else {
         setUserLoginState({ status: 'error', type: 'mobile' });
         message.error('Invalid OTP or Correlation ID');
       }
     } catch (error) {
-      
+      console.log(error);
     }
+
   };
 
   const handleSendOtp = async (phone: string) => {
     try {
-      if(phone === '')
-      {
+      if (phone === '') {
         message.error('Phone is required to send');
-        return
+        return;
       }
-    
+
       const result = await sendOtp(phone);
 
       if (result?.correlationId) {
@@ -60,6 +83,7 @@ const Login: React.FC = () => {
     }
   };
 
+
   const { status } = userLoginState;
 
   return (
@@ -71,14 +95,50 @@ const Login: React.FC = () => {
           </title>
         </Helmet>
         <Row gutter={[24, 24]}>
-              {/* Form Section */}
+          {/* Form Section */}
           <Col xs={24} md={9}>
             <LoginForm
               formRef={formRef}
               contentStyle={{
-              minWidth: 280,
-              maxWidth: '75vw',
+                minWidth: 280,
+                maxWidth: '75vw',
               }}
+              actions={          <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  flexDirection: 'column',
+                }}
+              >
+                <Divider plain>
+                  <span
+                    style={{
+                      fontWeight: 'normal',
+                      fontSize: 14,
+                    }}
+                  >
+                    Biometric Login
+                  </span>
+                </Divider>
+                <Space align="center" size={24}>
+                  <div
+                    onClick={() => handleWebAuthnLogin()}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                      flexDirection: 'column',
+                      height: 40,
+                      width: 40,
+                      border: '1px solid ',
+                      borderRadius: '50%',
+                    }}
+                  >
+                    <UnlockOutlined style={{ color: '#1677FF' }} />
+                  </div>
+                </Space>
+              </div>}
               logo={<img alt="logo" src="/logo.svg" />}
               title="Wallet KE"
               subTitle={intl.formatMessage({ id: 'pages.layouts.userLayout.title' })}
@@ -106,7 +166,11 @@ const Login: React.FC = () => {
                 ]}
               />
               <ProFormCaptcha
-                fieldProps={{ size: 'large', prefix: <LockOutlined /> }}
+                fieldProps={{
+                  size: 'large',
+                  prefix: <LockOutlined />,
+                  type: 'tel', // Set input type to 'tel' for OTP input
+                }}
                 captchaProps={{ size: 'large' }}
                 placeholder={intl.formatMessage({
                   id: 'pages.login.captcha.placeholder',
@@ -131,21 +195,24 @@ const Login: React.FC = () => {
                   timing ? `${count}` : 'Send OTP'
                 }
               />
+              <div style={{ marginTop: 24 }}>
+              </div>
             </LoginForm>
+
           </Col>
           {/* Image Section */}
           <Col xs={24} md={15}>
-                <img
-                  src="/money_boy.jpg" // Replace with your actual image URL
-                  alt="Drawee Illustration"
-                  style={{
-                    width: '100%',
-                    borderRadius: '8px',
-                    objectFit: 'cover',
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  }}
-                />
-           </Col>
+            <img
+              src="/money_boy.jpg" // Replace with your actual image URL
+              alt="Drawee Illustration"
+              style={{
+                width: '100%',
+                borderRadius: '8px',
+                objectFit: 'cover',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+              }}
+            />
+          </Col>
         </Row>
       </div>
     </PageTheme>
