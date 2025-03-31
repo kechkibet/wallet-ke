@@ -154,7 +154,11 @@ const Login: React.FC = () => {
               {status === 'error' && <div>OTP verification failed!</div>}
 
               <ProFormText
-                fieldProps={{ size: 'large', prefix: <MobileOutlined /> }}
+                fieldProps={{ 
+                  size: 'large', 
+                  prefix: <MobileOutlined />, 
+                  type: 'tel', // Set input type to 'tel' for OTP input
+                 }}
                 name="mobile"
                 placeholder={intl.formatMessage({
                   id: 'pages.login.phoneNumber.placeholder',
