@@ -1,8 +1,8 @@
 import { sendOtp, verifyOtp, handleWebAuthnLogin, handleWebAuthnRegistration } from './service';
-import { MobileOutlined, LockOutlined } from '@ant-design/icons';
+import { MobileOutlined, LockOutlined, LoadingOutlined  } from '@ant-design/icons';
 import { LoginForm, ProFormCaptcha, ProFormText } from '@ant-design/pro-components';
 import { Helmet, useIntl } from '@umijs/max';
-import { message, Tabs, Row, Col, Modal, Divider, Space } from 'antd';
+import { message, Tabs, Row, Col, Modal, Divider, Space, Spin } from 'antd';
 import React, { useRef, useState } from 'react';
 import Settings from '../../../../config/defaultSettings';
 import PageTheme from '@/components/PageTheme';
@@ -17,6 +17,7 @@ const Login: React.FC = () => {
   const [userLoginState, setUserLoginState] = useState<API.LoginResult>({});
   const [type, setType] = useState<string>('mobile');
   const [correlationId, setCorrelationId] = useState<string | null>(null); // Correlation ID for OTP verification
+  const [isBiometricLoading, setIsBiometricLoading] = useState(false); // Loading state for biometric login
   const intl = useIntl();
   const formRef = useRef<any>(null); // Reference to the form
 
@@ -83,6 +84,16 @@ const Login: React.FC = () => {
     }
   };
 
+  const handleBiometricLogin = async () => {
+    setIsBiometricLoading(true); // Start loading
+    try {
+      await handleWebAuthnLogin();
+    } catch (error) {
+      message.error('Biometric login failed, please try again.');
+    } finally {
+      setIsBiometricLoading(false); // Stop loading
+    }
+  };
 
   const { status } = userLoginState;
 
@@ -123,7 +134,7 @@ const Login: React.FC = () => {
                 </Divider>
                 <Space align="center" size={24}>
                   <div
-                    onClick={() => handleWebAuthnLogin()}
+                    onClick={handleBiometricLogin}
                     style={{
                       display: 'flex',
                       justifyContent: 'center',
@@ -133,9 +144,15 @@ const Login: React.FC = () => {
                       width: 40,
                       border: '1px solid ',
                       borderRadius: '50%',
+                      cursor: isBiometricLoading ? 'not-allowed' : 'pointer', // Disable click when loading
+                      opacity: isBiometricLoading ? 0.6 : 1, // Visual feedback for loading
                     }}
                   >
-                    <UnlockOutlined style={{ color: '#1677FF' }} />
+                    {isBiometricLoading ? (
+                      <Spin indicator={<LoadingOutlined spin />} />
+                    ) : (
+                      <img src="/icons/fp.svg" alt="Biometric Icon" style={{ width: 24, height: 24 }} />
+                    )}
                   </div>
                 </Space>
               </div>}
